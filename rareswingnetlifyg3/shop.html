@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>Shop &#183; Rare Swing</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="wrap">
+  <div class="shopHead">
+    <div class="brand" style="display:block"><h1>Shop</h1><span class="sub2">New jerseys, helmets and fields arrive every day. Buy once, wear any time.</span></div>
+    <div class="balance"><svg viewBox="0 0 20 20" width="26" height="26" aria-hidden="true"><circle cx="10" cy="10" r="8.5" fill="#efc752" stroke="#9a7416" stroke-width="1.5"/><text x="10" y="14" text-anchor="middle" font-size="11" font-weight="700" fill="#6b4f0a" font-family="Oswald, sans-serif">R</text></svg><div><div class="k">Your coins</div><div class="v" data-coins>0</div></div><a class="btn" href="coins.html">Get coins</a></div>
+  </div>
+  <section class="shopHero" id="shopHero"></section>
+  <section id="featured"></section>
+  <section id="passSec"></section>
+  <div class="shopTabs" id="shopTabs" role="tablist"><button type="button" class="on" data-f="all">All</button><button type="button" data-f="jersey">Jerseys</button><button type="button" data-f="helmet">Helmets</button><button type="button" data-f="field">Fields</button></div>
+  <div class="shopBar"><label for="previewTeam">Preview on</label><select id="previewTeam"></select><span id="shopMsg" aria-live="polite"></span></div>
+  <div class="dropNote" id="dropNote"></div>
+  <section data-sec="drops" id="dropsSec" hidden><div class="sec-h"><h2>New today</h2><span id="dropClock"></span></div><div class="shopGrid" id="dropGrid"></div></section>
+  <section data-sec="mine" id="mineSec" hidden><div class="sec-h"><h2>Added in earlier days</h2><span id="mineCount"></span></div><div class="shopGrid" id="mineGrid"></div></section>
+  <section data-sec="jersey"><div class="sec-h"><h2>Classic jerseys</h2><span id="cJersey"></span></div><div class="shopGrid" id="jerseyGrid"></div></section>
+  <section data-sec="helmet"><div class="sec-h"><h2>Classic helmets</h2><span id="cHelmet"></span></div><div class="shopGrid" id="helmetGrid"></div></section>
+  <section data-sec="field"><div class="sec-h"><h2>Classic fields</h2><span id="cField"></span></div><div class="shopGrid" id="fieldGrid"></div></section>
+  <section data-sec="coins" id="coinsSec"><div class="sec-h"><h2>Need more coins?</h2><span>Coins buy items and extra games</span></div><div class="packGrid" id="shopPacks"></div></section>
+</main>
+<footer class="foot"><span>Rare Swing. Answers are rated by how rarely people say them. Saved on this device. Build 11-27a.</span><span><a href="index.html">Home</a> &#183; <a href="daily.html">Daily</a> &#183; <a href="play.html">Play</a> &#183; <a href="shop.html">Shop</a> &#183; <a href="coins.html">Coins</a> &#183; <a href="#" id="creatorLink" class="creatorLink">Creator</a></span></footer>
+<script>document.body.dataset.page="shop";</script>
+<script src="settings.js"></script>
+<script src="common.js"></script>
+<script src="data.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function shade(hex, k) { const n = parseInt(hex.slice(1), 16), f = c => Math.max(0, Math.min(255, Math.round(c * k))); return "#" + [n >> 16 & 255, n >> 8 & 255, n & 255].map(f).map(v => v.toString(16).padStart(2, "0")).join(""); }
+function helmetSVG(color) {
+  const dk = shade(color, .62);
+  return '<svg viewBox="0 0 110 84" aria-hidden="true"><ellipse cx="52" cy="76" rx="38" ry="5" fill="#000" opacity=".35"/><path d="M12 54C12 28 32 12 58 14c22 2 34 16 34 36v6H62c0 8-8 14-19 14C26 70 12 64 12 54z" fill="' + color + '" stroke="' + dk + '" stroke-width="2.5"/><path d="M60 50h46v8H64z" fill="' + dk + '"/><path d="M36 44c0-8 10-10 17-4v24c-9 4-17-2-17-20z" fill="' + dk + '"/><path d="M24 34C28 24 40 18 54 18" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".35"/></svg>';
+}
+function fieldSVG(f) {
+  let fans = ""; const cols = ["#e0703d", "#f2efe4", "#4f8fe0"];
+  for (let r = 0; r < 3; r++) for (let i = 0; i < 24; i++) { const a = (-48 + 96 * i / 23) * Math.PI / 180, rad = 126 + r * 6; fans += '<circle cx="' + (100 + rad * Math.sin(a)).toFixed(1) + '" cy="' + (118 - rad * Math.cos(a)).toFixed(1) + '" r="1.8" fill="' + cols[(i + r) % 3] + '"/>'; }
+  return '<svg viewBox="0 0 200 130" aria-hidden="true"><rect width="200" height="130" fill="' + f.stand + '"/>' + fans + '<path d="M100 118 L18 36 A116 116 0 0 1 182 36 Z" fill="' + f.grass + '"/><path d="M100 118 L18 36 A116 116 0 0 1 182 36 Z" fill="' + f.stripe + '" opacity=".35"/><path d="M18 36 A116 116 0 0 1 182 36" fill="none" stroke="' + f.line + '" stroke-width="3"/><polygon points="100,118 128,92 100,66 72,92" fill="' + f.dirt + '"/><polygon points="100,111 121,92 100,73 79,92" fill="' + f.infield + '"/><circle cx="100" cy="94" r="5" fill="' + f.dirt + '"/><g fill="' + f.line + '"><rect x="125" y="89" width="6" height="6" transform="rotate(45 128 92)"/><rect x="97" y="63" width="6" height="6" transform="rotate(45 100 66)"/><rect x="69" y="89" width="6" height="6" transform="rotate(45 72 92)"/></g></svg>';
+}
+let justBought = "", filt = "all";
+const rarity = p => p < 100 ? ["Common", "#aab4bd"] : p < 250 ? ["Rare", "#4f8fe0"] : p < 500 ? ["Epic", "#b27cf0"] : ["Legendary", "#efc752"];
+function pvFor(kind, it) {
+  const team = TEAMS.find(t => t.abbr === RS.d.team) || TEAMS[0];
+  const teamHelm = Math.abs(lumOf(team.c2) - lumOf(team.c1)) > .25 ? team.c2 : (lumOf(team.c1) > .5 ? "#15171b" : "#f2efe4");
+  if (kind === "jersey") return jersey(it.c1 ? Object.assign({}, team, { c1: it.c1, c2: RS.trim(it, team) }) : team, 120);
+  if (kind === "helmet") return helmetSVG(it.color || teamHelm);
+  return fieldSVG(it);
+}
+const accOf = (kind, it) => it.c1 || it.color || it.grass || "#aab4bd";
+function renderTop() {
+  const d = RS.d, team = TEAMS.find(t => t.abbr === d.team) || TEAMS[0], j = RS.lookup("jersey", d.eq.jersey) || JERSEYS[0], h = RS.lookup("helmet", d.eq.helmet) || HELMETS[0], f = RS.lookup("field", d.eq.field) || FIELDS[0];
+  const all = [...JERSEYS.map(i => ["jersey", i]), ...HELMETS.map(i => ["helmet", i]), ...FIELDS.map(i => ["field", i])];
+  const owned = all.filter(([k, i]) => d.owned[k].includes(i.id)).length, left = all.filter(([k, i]) => !d.owned[k].includes(i.id));
+  const goal = left.sort((a, b) => a[1].price - b[1].price)[0];
+  const pct = Math.min(100, Math.round(d.coins / (goal ? goal[1].price : 1) * 100));
+  const jt = j && j.c1 ? Object.assign({}, team, { c1: j.c1, c2: RS.trim(j, team) }) : team;
+  $("shopHero").innerHTML = '<div class="look"><div class="lookBg">' + fieldSVG(f) + '</div><div class="lookJ">' + jersey(jt, 120) + '</div><div class="lookH">' + helmetSVG(h.color || (Math.abs(lumOf(team.c2) - lumOf(team.c1)) > .25 ? team.c2 : "#f2efe4")) + '</div><div class="lookT"><span class="k">Your look</span><b>' + esc(j.name) + ' \u00b7 ' + esc(h.name) + ' \u00b7 ' + esc(f.name) + '</b></div></div>' ;
+  $("passSec").innerHTML = d.unlimited ? '<div class="passCard on"><div><span class="k">Play Pass</span><h2>Unlimited games, active</h2><p>Every game is free, all day, every day. Thanks for playing.</p></div></div>' : '<div class="passCard"><div><span class="k">Play Pass</span><h2>Free games, forever</h2><p>You get ' + RS_CONFIG.freePlaysPerDay + ' free games a day. Pay once and every game is free, all day, every day.</p></div><div class="passBuy"><b>' + RS_CONFIG.passCost + ' coins</b>' + (d.coins >= RS_CONFIG.passCost ? '<button type="button" data-act="pass:x:x">Unlock \u00b7 ' + RS_CONFIG.passCost + '</button>' : '<button type="button" class="need" data-act="pass:x:x">Get more coins</button>') + '</div></div>';
+  const lsvg = document.querySelector(".lookBg svg"); if (lsvg) lsvg.setAttribute("preserveAspectRatio", "xMidYMid slice");
+  const dr = RS.drops(), allD = [...dr.jersey.map(i => ["jersey", i]), ...dr.helmet.map(i => ["helmet", i]), ...dr.field.map(i => ["field", i])].sort((a, b) => b[1].rarity - a[1].rarity || b[1].price - a[1].price);
+  let fk, fi, fresh = allD.length > 0;
+  if (fresh) { const cand = allD.filter(([k, i]) => !d.owned[k].includes(i.id)); [fk, fi] = (cand.length ? cand : allD)[0]; }
+  else { const cl = [...JERSEYS.slice(1).map(i => ["jersey", i]), ...HELMETS.slice(1).map(i => ["helmet", i]), ...FIELDS.slice(1).map(i => ["field", i])], cand = cl.filter(([k, i]) => !d.owned[k].includes(i.id)), pool = cand.length ? cand : cl; let hsh = 0; for (const ch of RS.dayKey()) hsh = (hsh * 31 + ch.charCodeAt(0)) >>> 0; [fk, fi] = pool[hsh % pool.length]; }
+  const rr = fi.drop ? RARITY[fi.rarity] : rarity(fi.price);
+  $("featured").innerHTML = '<div class="feat" style="--acc:' + (lumOf(accOf(fk, fi)) < .35 ? shade(accOf(fk, fi), lumOf(accOf(fk, fi)) < .12 ? 3.2 : 1.9) : accOf(fk, fi)) + '"><div class="fpv">' + pvFor(fk, fi) + '</div><div class="ftxt"><span class="fbadge">' + (fresh ? "New today" : "Featured") + '</span><h2>' + esc(fi.name) + '</h2><p>' + esc(fi.note) + '. A ' + rr[0].toLowerCase() + ' ' + fk + '.</p><div class="fact">' + (d.owned[fk].includes(fi.id) ? '<b>Purchased</b>' : d.coins >= fi.price ? '<div class="fcost"><span class="k">Price</span><b>' + fi.price + ' coins</b></div><button type="button" data-act="buy:' + fk + ':' + fi.id + '">Buy \u00b7 ' + fi.price + ' coins</button>' : '<div class="fcost"><span class="k">Price</span><b>' + fi.price + ' coins</b></div><button type="button" class="need" data-act="need:' + fk + ':' + fi.id + '">Get more coins</button>') + '</div></div></div>';
+}
+function applyFilter() {
+  document.querySelectorAll("#dropGrid .item, #mineGrid .item").forEach(x => { x.hidden = !(filt === "all" || x.dataset.kind === filt); });
+  document.querySelectorAll("[data-sec]").forEach(s => {
+    if (s.dataset.sec === "drops") s.hidden = !$("dropGrid").children.length || !$("dropGrid").querySelector(".item:not([hidden])");
+    else if (s.dataset.sec === "mine") s.hidden = !$("mineGrid").children.length || !$("mineGrid").querySelector(".item:not([hidden])");
+    else s.hidden = !(filt === "all" || s.dataset.sec === filt || s.dataset.sec === "coins");
+  });
+  document.querySelectorAll("#shopTabs button").forEach(x => x.classList.toggle("on", x.dataset.f === filt));
+}
+function item(kind, it, pv, acc) {
+  if (lumOf(acc) < .22) acc = kind === "field" ? "#38f0d0" : "#aab4bd";   /* dark items get a lighter button so it stays readable */
+  const d = RS.d, owned = d.owned[kind].includes(it.id), on = d.eq[kind] === it.id;
+  const coin = '<svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="10" cy="10" r="8.5" fill="#efc752" stroke="#9a7416" stroke-width="1.5"/></svg>';
+  let ribbon = "", action;
+  if (owned) {
+    ribbon = '<span class="ribbon"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>' + (it.price ? "Purchased" : "Included") + '</span>';
+    action = on ? '<div class="wearing">Wearing now</div>' : '<button type="button" class="wear" data-act="equip:' + kind + ':' + it.id + '">Wear this</button>';
+  } else if (d.coins >= it.price) action = '<button type="button" class="buy" data-act="buy:' + kind + ':' + it.id + '">Buy \u00b7 ' + it.price + '</button>';
+  else action = '<button type="button" class="buy need" data-act="need:' + kind + ':' + it.id + '">Get more coins</button>';
+  const rr = it.drop ? RARITY[it.rarity] : rarity(it.price), tag = it.price ? '<span class="rar" style="--rc:' + rr[1] + '">' + rr[0] + '</span>' : "";
+  return '<div class="item' + (owned ? " owned" : "") + (on ? " on" : "") + (justBought === kind + it.id ? " just" : "") + '" data-kind="' + kind + '" style="--acc:' + acc + '">' + ribbon + tag + '<div class="pv">' + pv + '</div><h3>' + esc(it.name) + '</h3><div class="n">' + esc(it.note) + '</div><div class="price">' + (owned ? "&nbsp;" : (it.price ? coin + " " + it.price : "Free")) + '</div>' + action + '</div>';
+}
+function render() {
+  const d = RS.d, team = TEAMS.find(t => t.abbr === d.team) || TEAMS[0];
+  const teamHelm = Math.abs(lumOf(team.c2) - lumOf(team.c1)) > .25 ? team.c2 : (lumOf(team.c1) > .5 ? "#15171b" : "#f2efe4");
+  $("jerseyGrid").innerHTML = JERSEYS.map(j => { const t = j.c1 ? Object.assign({}, team, { c1: j.c1, c2: RS.trim(j, team) }) : team; return item("jersey", j, jersey(t, 120), j.c1 || team.c1); }).join("");
+  $("helmetGrid").innerHTML = HELMETS.map(h => item("helmet", h, helmetSVG(h.color || teamHelm), h.color || teamHelm)).join("");
+  $("fieldGrid").innerHTML = FIELDS.map(f => item("field", f, fieldSVG(f), f.grass)).join("");
+  const dr = RS.drops(), cellFor = (k, it) => item(k, it, pvFor(k, it), accOf(k, it)), rel = RS.released();
+  $("dropGrid").innerHTML = [["jersey", dr.jersey], ["helmet", dr.helmet], ["field", dr.field]].map(([k, l]) => l.map(it => cellFor(k, it)).join("")).join("");
+  $("dropsSec").hidden = !$("dropGrid").children.length;
+  const earlier = []; rel.slice(1).forEach(day => ["jersey", "helmet", "field"].forEach(k => day[k].forEach(it => earlier.push([k, it]))));
+  $("mineSec").hidden = !earlier.length; $("mineCount").textContent = earlier.length + " items";
+  $("mineGrid").innerHTML = earlier.map(([k, it]) => cellFor(k, it)).join("");
+  [["cJersey", "jersey", JERSEYS], ["cHelmet", "helmet", HELMETS], ["cField", "field", FIELDS]].forEach(([id, k, list]) => { $(id).textContent = d.owned[k].filter(x => list.some(i => i.id === x)).length + " of " + list.length + " owned"; });
+  document.querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", () => {
+    const [act, kind, id] = b.dataset.act.split(":");
+    if (act === "pass") { if (RS.buyPass()) $("shopMsg").textContent = "Play Pass unlocked. Every game is free from now on."; else { const s = $("coinsSec"); s.scrollIntoView({ behavior: "smooth", block: "start" }); s.classList.remove("flash"); void s.offsetWidth; s.classList.add("flash"); $("shopMsg").textContent = "Pick a coin pack below to get the Play Pass."; } render(); return; }
+    const it = RS.lookup(kind, id);
+    if (act === "need") { const s = $("coinsSec"); s.scrollIntoView({ behavior: "smooth", block: "start" }); s.classList.remove("flash"); void s.offsetWidth; s.classList.add("flash"); $("shopMsg").textContent = "Pick a coin pack below to get " + it.name + "."; return; }
+    if (act === "buy") { if (RS.buy(kind, id)) { justBought = kind + id; $("shopMsg").textContent = "Purchased " + it.name + " and put it on."; } }
+    else { RS.equip(kind, id); justBought = ""; $("shopMsg").textContent = "Now wearing " + it.name + "."; }
+    RS.applyField(); render();
+  }));
+  renderTop(); applyFilter();
+  paintCoins();
+}
+function lumOf(hex) { const n = parseInt(hex.slice(1), 16); return (0.2126 * (n >> 16 & 255) + 0.7152 * (n >> 8 & 255) + 0.0722 * (n & 255)) / 255; }
+$("previewTeam").innerHTML = TEAMS.map(t => '<option value="' + t.abbr + '">' + esc(t.name) + '</option>').join("");
+$("previewTeam").value = RS.d.team;
+$("previewTeam").addEventListener("change", e => { RS.d.team = e.target.value; RS.save(); render(); });
+$("shopPacks").innerHTML = coinPackCards(true);
+{ const tick = () => { const n = new Date(), m = new Date(n.getFullYear(), n.getMonth(), n.getDate() + 1), s = Math.max(0, m - n) / 1000 | 0, p = v => String(v).padStart(2, "0"); const t = p(s / 3600 | 0) + ":" + p(s / 60 % 60 | 0) + ":" + p(s % 60); $("dropNote").innerHTML = "New jerseys, helmets and fields arrive every day. Next batch in <strong>" + t + "</strong>."; $("dropClock").textContent = "Added today"; if (s <= 0) location.reload(); }; tick(); setInterval(tick, 1000); }
+document.querySelectorAll("#shopTabs button").forEach(x => x.addEventListener("click", () => { filt = x.dataset.f; applyFilter(); }));
+render();
+</script>
+</body>
+</html>
