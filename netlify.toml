@@ -1,0 +1,5 @@
+# The site lives in the rareswingnetlifyg1 folder, not at the top of the repo.
+[build]
+  base = "rareswingnetlifyg1"
+  publish = "."
+  functions = "netlify/functions"
