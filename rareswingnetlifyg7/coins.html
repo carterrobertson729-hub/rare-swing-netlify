@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>Coins &#183; Rare Swing</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="wrap">
+  <div class="brand"><h1>Get coins</h1><span>Coins buy extra plays, jerseys and fields.</span></div>
+  <div class="demoNote" id="demoNote" hidden><strong>Demo mode.</strong> No card is charged. The Buy buttons run a pretend checkout and add the coins on this device, so you can see how it will look. Real payments get connected through Stripe later.</div>
+  <div class="packGrid" id="packGrid"></div>
+</main>
+<div class="overlay" id="co" hidden><div class="modal" role="dialog" aria-labelledby="coH"><div id="coBody"></div></div></div>
+<footer class="foot"><span>Rare Swing. Answers are rated by how rarely people say them. Saved on this device. Build 11-28b.</span><span><a href="index.html">Home</a> &#183; <a href="daily.html">Daily</a> &#183; <a href="play.html">Play</a> &#183; <a href="shop.html">Shop</a> &#183; <a href="coins.html">Coins</a> &#183; <a href="#" id="creatorLink" class="creatorLink">Creator</a></span></footer>
+<script>document.body.dataset.page="coins";</script>
+<script src="settings.js"></script>
+<script src="common.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+$("packGrid").innerHTML = coinPackCards(false);
+if (RS_CONFIG.stripe.demoMode) $("demoNote").hidden = false;
+
+const co = $("co"), body = $("coBody");
+function close() { co.hidden = true; }
+async function openCheckout(p) {
+  if (!RS_CONFIG.stripe.demoMode && RS_CONFIG.accounts.enabled) {   /* coins are credited to an account, so buying needs a login */
+    await RS.account.ready;
+    if (!RS.account.user) { window.RSAccount.open("signup", "Log in or create an account to buy coins."); return; }
+  }
+  body.innerHTML = '<h2 id="coH">Checkout</h2><div class="sumRow"><span>' + esc(p.name) + '</span><b>' + p.coins.toLocaleString() + ' coins</b></div><div class="sumRow"><span>Total</span><b>' + RS.price(p.cents) + '</b></div>' +
+    '<p class="note">' + (RS_CONFIG.stripe.demoMode ? 'Demo mode: nothing is charged. Pressing the button adds the coins to this device only.' : 'You will be sent to Stripe to pay securely.') + '</p>' +
+    '<div class="pwBtns"><button type="button" id="coPay">' + (RS_CONFIG.stripe.demoMode ? 'Complete demo purchase' : 'Continue to payment') + '</button><button type="button" class="ghost" id="coCancel">Cancel</button></div>';
+  co.hidden = false; $("coPay").focus();
+  $("coCancel").onclick = close;
+  $("coPay").onclick = () => startCheckout(p);
+}
+/* ---- the Stripe hook. With demoMode off, this sends the player to a Stripe Checkout Session your server creates. ---- */
+async function startCheckout(p) {
+  if (RS_CONFIG.stripe.demoMode) {
+    RS.demoGrant(p);
+    body.innerHTML = '<h2 id="coH">Coins added</h2><p style="margin:0"><strong>+' + p.coins.toLocaleString() + ' coins</strong> are in your account. You now have <strong>' + RS.d.coins.toLocaleString() + '</strong>.</p><div class="pwBtns"><a class="btn" href="play.html">Play</a><a class="btn ghost" href="shop.html">Shop</a><button type="button" class="ghost" id="coDone">Close</button></div>';
+    $("coDone").onclick = close; return;
+  }
+  try {
+    $("coPay").disabled = true; $("coPay").textContent = "Opening checkout\u2026";
+    const res = await fetch(RS_CONFIG.stripe.api + "/create-checkout-session", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ packId: p.id }) });
+    const data = await res.json();
+    if (!data.url) throw new Error("No checkout URL");
+    location.href = data.url;
+  } catch (e) {
+    body.innerHTML = '<h2 id="coH">Checkout is unavailable</h2><p style="margin:0">We could not reach the payment service. Nothing was charged. Please try again in a moment.</p><div class="pwBtns"><button type="button" id="coDone">Close</button></div>';
+    $("coDone").onclick = close;
+  }
+}
+/* coming back from Stripe: the coins are added by the server webhook a moment after payment, so check a few times */
+if (!RS_CONFIG.stripe.demoMode && /[?&]paid=1/.test(location.search)) {
+  const bn = document.createElement("div"); bn.id = "paidBanner"; bn.className = "demoNote"; bn.style.borderColor = "var(--gold)"; bn.textContent = "Thanks! Checking for your coins\u2026";
+  document.querySelector("main").insertBefore(bn, document.querySelector("main").children[1]);
+  let tries = 0; const poll = async () => { await RS.claimPurchases(); const n = RS.d.purchases.filter(x => x.session && Date.now() - x.at < 180000).reduce((s, x) => s + x.coins, 0); if (n) { bn.innerHTML = "<strong>+" + n.toLocaleString() + " coins added.</strong> You now have " + RS.d.coins.toLocaleString() + "."; paintCoins(); } else if (++tries < 15) setTimeout(poll, 2000); else bn.textContent = "Your payment went through. If the coins are not here yet, reload this page in a minute."; }; poll();
+}
+document.querySelectorAll("[data-pack]").forEach(b => b.addEventListener("click", () => openCheckout(COIN_PACKS.find(p => p.id === b.dataset.pack))));
+co.addEventListener("click", e => { if (e.target === co) close(); });
+{ const want = new URLSearchParams(location.search).get("buy"), p = COIN_PACKS.find(x => x.id === want); if (p) openCheckout(p); }
+document.addEventListener("keydown", e => { if (e.key === "Escape") close(); });
+</script>
+</body>
+</html>

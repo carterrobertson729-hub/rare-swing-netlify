@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>Daily &#183; Rare Swing</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+<div class="glow" id="glow" aria-hidden="true"></div>
+<div class="hitbanner" id="hitbanner" aria-hidden="true"><span id="hitword"></span></div>
+<div class="intro" id="intro" hidden><div id="introIn"></div></div>
+<div class="overlay setOv" id="settings" hidden><div class="modal setModal" role="dialog" aria-labelledby="setH">
+  <div id="setMain"><h2 id="setH">Settings</h2><p class="setSub">The clock keeps running while this is open.</p>
+    <div class="setList">
+      <button id="setResume" type="button">Back to the game</button>
+      <button id="setMute" type="button" class="ghost"></button>
+      <button id="setFs" type="button" class="ghost">Full screen</button>
+      <button id="setLeave" type="button" class="ghost danger">Leave game</button>
+    </div></div>
+  <div id="setConfirm" hidden><h2>Leave this game?</h2><p id="setWarn" class="setWarn"></p>
+    <div class="setList"><button id="setStay" type="button">Stay and keep playing</button><button id="setReallyLeave" type="button" class="ghost danger">Leave game</button></div></div>
+</div></div>
+<div class="wrap" id="start">
+  <div class="brand"><h1>Daily game</h1><span id="dailyDate"></span></div>
+  <div class="introCard" id="welcome"><div class="introTop"><div><div class="ik">Daily game</div><h2>One daily game</h2><p id="introText">You get one daily game every day. It's the same 7 questions and the same opponent for everyone, so you can compare scores with friends. Win it to earn <strong>20 coins</strong> and keep your streak going.</p><div class="introBtns"><button id="introGo" type="button">Play now</button><a class="btn ghost" href="coins.html">Coins</a></div></div><div class="introStats" id="introStats"></div></div><div class="introHow"><h3>How it works</h3><ol><li><b>Pick your team.</b> A hidden computer team is your opponent.</li><li><b>Seven at-bats, 25 seconds each.</b> Each question has lots of right answers.</li><li><b>The rarer your answer, the farther it flies.</b> Run out of time and it's a strikeout.</li></ol></div><div class="introLadder" aria-label="Hit ladder"><span class="lad l1"><b>1B</b>Common answer</span><span class="lad l2"><b>2B</b>Less common</span><span class="lad l3"><b>3B</b>Rare</span><span class="lad l4"><b>HR</b>Extremely rare</span></div></div>
+  <div id="pickStep" hidden>
+  <a class="backHome" href="index.html">&larr; Back to home</a>
+  <div class="dailyInfo"><span><b>7 questions</b>, the same for everyone today</span><span><b>One game</b> a day</span><span><b>+20 coins</b> for a win, and a streak to keep</span></div>
+  <section><h2 id="pickA">Pick your team</h2><div class="pickwrap"><div class="pickbox" tabindex="0" aria-label="Team list, scroll to see all 30"><div class="teams" id="gridA"></div></div></div><div class="hint" id="pickHint" style="margin-top:8px"></div></section>
+  <div class="startbar">
+    <div><div class="matchup" id="matchup"></div><div class="hint" id="playsInfo"></div></div>
+    <button id="play" type="button">Play today's game</button>
+  </div>
+  </div>
+</div>
+<div class="wrap" id="dailyDone" hidden>
+  <div class="brand"><h1>Daily game</h1><span>You've played today</span></div>
+  <div id="dailyDoneBody"></div>
+  <div class="tcard"><div class="k" style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Next daily game in</div><div class="nextClock" id="nextDaily">--:--:--</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" id="copyDaily" class="ghost">Copy result</button><a class="btn" href="shop.html">Spend coins</a><a class="btn ghost" href="play.html">Play a free game</a><a class="btn ghost" href="index.html">Home</a></div></div>
+</div>
+<div class="wrap" id="game" hidden>
+  <div class="gameBody">
+    <div class="slotTop" id="slotTop"></div>
+    <div class="stageBox"><div class="stage" id="stage">
+      <svg id="svg" viewBox="12 22 376 313" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Baseball field with fans in the stands">
+        <rect x="0" y="-10" width="400" height="345" fill="#0a140f"/>
+        <defs>
+          <pattern id="mow" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width="20" height="40" class="f-stripe" opacity=".55"/>
+          </pattern>
+        </defs>
+        <path d="M25.1 135.3 A222 222 0 0 1 374.9 135.3" class="f-stand" stroke-width="40"/>
+        <path d="M240.6 293.6 A46 46 0 0 1 159.4 293.6" class="f-stand stand-bp" stroke-width="31"/>
+        <g id="fans"></g>
+        <path d="M200 272 L62 134 A195 195 0 0 1 338 134 Z" class="f-grass"/>
+        <path d="M200 272 L62 134 A195 195 0 0 1 338 134 Z" fill="url(#mow)"/>
+        <path d="M62 134 A195 195 0 0 1 338 134" class="f-line" stroke-width="5" opacity=".9"/>
+        <polygon points="200,272 242,230 200,188 158,230" class="f-dirt" opacity=".92"/>
+        <polygon points="200,262 233,230 200,198 167,230" class="f-inf"/>
+        <circle cx="200" cy="244" r="9" class="f-dirt"/>
+        <g class="f-base">
+          <rect x="236" y="224" width="12" height="12" transform="rotate(45 242 230)"/>
+          <rect x="194" y="182" width="12" height="12" transform="rotate(45 200 188)"/>
+          <rect x="152" y="224" width="12" height="12" transform="rotate(45 158 230)"/>
+          <polygon points="194,268 206,268 206,274 200,279 194,274"/>
+        </g>
+        <g id="dots"></g>
+        <g id="bat" transform="translate(181 262) rotate(-40)"><line x1="0" y1="0" x2="0" y2="-27" stroke="#d9b27a" stroke-width="4" stroke-linecap="round"/><line x1="0" y1="-17" x2="0" y2="-27" stroke="#b98a4e" stroke-width="5.5" stroke-linecap="round"/></g>
+        <circle id="pop" cx="200" cy="268" r="0" fill="none" stroke="#fff" stroke-width="3" opacity="0"/>
+        <ellipse id="shadow" cx="200" cy="270" rx="4" ry="2" fill="#000" opacity="0"/>
+        <circle id="ball" cx="200" cy="268" r="5" fill="#fff" stroke="#c33" stroke-width="1" opacity="0"/>
+        <text id="dist" x="200" y="125" text-anchor="middle" fill="#efc752" font-family="Oswald, sans-serif" font-size="22" letter-spacing="2" opacity="0"></text>
+      </svg>
+      <button class="fsBtn gearBtn" id="gearBtn" type="button" aria-label="Settings and pause"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+      <div class="sbWrap"><div class="board scoreboard" id="board" role="group" aria-label="Scoreboard"></div><div class="log" id="log" aria-label="At-bat log"></div></div>
+      <div class="card" id="card">
+        <div class="pitchmeta">
+          <div class="bat" id="batting"></div>
+          <span class="hint" id="pitchno">Round 1 of 7</span>
+        </div>
+        <div class="q" id="q">&nbsp;</div>
+        <div class="timer" id="timer"><div id="bar"></div></div>
+        <div class="secs" id="secs">25s</div>
+        <form id="form" autocomplete="off">
+          <input type="text" id="ans" placeholder="Type your answer" aria-label="Your answer" autocapitalize="words" spellcheck="false">
+          <button type="submit" id="swing">Swing</button>
+        </form>
+        <div class="warn" id="warn" aria-live="polite"></div>
+        <div class="sugg" id="sugg"></div>
+        <div class="result" id="result" hidden aria-live="polite">
+          <div class="big" id="rbig"></div>
+          <div class="pips" id="rpips"></div>
+          <div class="note" id="rnote"></div>
+          <div class="nextRow"><button id="next" type="button">Next</button></div>
+          <div class="ex">
+            <div><span class="k">A common answer</span><span id="rcommon"></span></div>
+            <div><span class="k">A deeper cut</span><span id="rdeep"></span></div>
+          </div>
+        </div>
+        <div class="hint tip">25 seconds per at-bat. Run out of time and it's a strikeout. Common answer: single. Less common: double. Rare: triple. Extremely rare: home run.</div>
+      </div>
+    </div></div>
+    <div class="slotBottom" id="slotBottom"></div>
+  </div>
+</div>
+<div class="wrap" id="recap" hidden>
+  <div class="brand"><h1>Game recap</h1><span id="recapTitle"></span></div>
+  <div id="recapTop"></div>
+  <div class="note" id="endBest"></div>
+  <div class="note" id="coinNote"></div>
+  <div class="rlist" id="recapList"></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn" href="shop.html">Spend coins</a><a class="btn ghost" href="play.html">Play a free game</a><a class="btn ghost" href="index.html">Home</a></div>
+</div>
+</main>
+<footer class="foot"><span>Rare Swing. Answers are rated by how rarely people say them. Saved on this device. Build 11-28b.</span><span><a href="index.html">Home</a> &#183; <a href="daily.html">Daily</a> &#183; <a href="play.html">Play</a> &#183; <a href="shop.html">Shop</a> &#183; <a href="coins.html">Coins</a> &#183; <a href="#" id="creatorLink" class="creatorLink">Creator</a></span></footer>
+<script>document.body.dataset.page="daily";window.RS_GAME=true;window.RS_MODE="daily";</script>
+<script src="settings.js"></script>
+<script src="common.js"></script>
+<script src="data.js"></script>
+<script src="rosters.js"></script>
+<script src="famous.js"></script>
+<script src="extra.js"></script>
+<script src="extra2.js"></script>
+<script src="seasons.js"></script>
+<script src="overrides.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
